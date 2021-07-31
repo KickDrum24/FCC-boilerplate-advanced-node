@@ -12,6 +12,14 @@ const app = express();
 
 fccTesting(app); //For FCC testing purposes
 
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/');
+};
+
+
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: true,
@@ -63,6 +71,11 @@ passport.deserializeUser((id, done) => {
   app.route('/').get((req, res) => {
     res.render('pug', { title: e, message: 'Unable to login' });
   });
+  
+  // ensureAuthenticated as a middleware to the request for the profile page
+  app.route('/profile').get(ensureAuthenticated, (req,res) => {
+    res.render(process.cwd() + '/views/pug/profile');
+ });
 });
 
 
