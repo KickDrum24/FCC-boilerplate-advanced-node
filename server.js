@@ -34,6 +34,11 @@ app.use('/public', express.static(process.cwd() + '/public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ensureAuthenticated as a middleware to the request for the profile page
+app.route('/profile').get(ensureAuthenticated, (req,res) => {
+  res.render(process.cwd() + '/views/pug/profile');
+});
+
 myDB(async client => {
   const myDataBase = await client.db('database').collection('users')
 
@@ -72,10 +77,7 @@ passport.deserializeUser((id, done) => {
     res.render('pug', { title: e, message: 'Unable to login' });
   });
   
-  // ensureAuthenticated as a middleware to the request for the profile page
-  app.route('/profile').get(ensureAuthenticated, (req,res) => {
-    res.render(process.cwd() + '/views/pug/profile');
- });
+  
 });
 
 
