@@ -5,6 +5,8 @@ const myDB = require('./connection');
 const fccTesting = require('./freeCodeCamp/fcctesting.js');
 const ObjectID = require('mongodb').ObjectID;
 const LocalStrategy = require('passport-local');
+const bcrypt = require('bcrypt');
+const bodyParser = require('body-parser');
 var session = require('express-session');
 var passport = require('passport');
 
@@ -19,6 +21,7 @@ function ensureAuthenticated(req, res, next) {
   res.redirect('/');
 };
 
+app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(session({
   secret: process.env.SESSION_SECRET,
@@ -39,7 +42,7 @@ app.route('/profile').get(ensureAuthenticated, (req, res) => {
   res.render(process.cwd() + '/views/pug/profile', { username: req.user.username });
 });
 
-const hash = bcrypt.hashSync(req.body.password, 12);
+
 myDB(async client => {
   const myDataBase = await client.db('database').collection('users')
 
@@ -50,6 +53,7 @@ myDB(async client => {
 
   app.route('/register')
     .post((req, res, next) => {
+      const hash = bcrypt.hashSync(req.body.password, 12);
       myDataBase.findOne({ username: req.body.username }, function (err, user) {
         if (err) {
           next(err);
@@ -124,7 +128,12 @@ myDB(async client => {
     res.render('pug', { title: e, message: 'Unable to login' });
   });
 
-
+  // app.get('/api/users/86', (req, res) => {
+  //   Person.deleteMany({ username: { $exists: true } }, req.body, (err, data) => {
+  //     !err ? console.log("Deleted Many!") : console.log(err);
+  //     res.json({ 'Objects with usernames have been deleted': null })
+  //   })
+  // });
 });
 
 
