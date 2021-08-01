@@ -39,7 +39,7 @@ app.route('/profile').get(ensureAuthenticated, (req, res) => {
   res.render(process.cwd() + '/views/pug/profile', { username: req.user.username });
 });
 
-
+const hash = bcrypt.hashSync(req.body.password, 12);
 myDB(async client => {
   const myDataBase = await client.db('database').collection('users')
 
@@ -58,7 +58,7 @@ myDB(async client => {
         } else {
           myDataBase.insertOne({
             username: req.body.username,
-            password: req.body.password
+            password: hash
           },
             (err, doc) => {
               if (err) {
@@ -75,6 +75,10 @@ myDB(async client => {
     },
       passport.authenticate('local', { failureRedirect: '/' }),
       (req, res, next) => {
+        if (!bcrypt.compareSync(password, user.password)) { 
+          return done(null, false);
+        }
+        
         res.redirect('/profile');
       }
     );
