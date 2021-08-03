@@ -4,9 +4,21 @@ module.exports = function (app, myDataBase) {
     console.log("routes.js loaded");
     app.route('/').get((req, res) => {
         res.render('pug', {
-            showLogin: true, title: 'Connected to Database', message: 'Please login', showRegistration: true
+            showLogin: true, 
+            title: 'Connected to Database', 
+            message: 'Please login', 
+            showRegistration: true,
+            showSocialAuth: true 
         });
     });
+    app.route('/auth/github').get(passport.authenticate('github'))
+    // , (req,res) => {
+
+    // });
+    app.route('/auth/github/callback').get(passport.authenticate('github', { failureRedirect: '/' }), (req,res) => {
+        res.redirect('/profile')
+    });
+    
     app.route('/login').post(passport.authenticate('local', { failureRedirect: '/' }), (req, res) => {
         res.redirect('/profile')
     });
