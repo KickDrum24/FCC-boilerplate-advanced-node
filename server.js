@@ -65,6 +65,17 @@ http.listen(PORT, () => {
     ++currentUsers;
     console.log('A user has connected');
     io.emit('user count', currentUsers);
+
+    http.listen(PORT, () => {
+      socket.on('disconnect', () => {
+        /*anything you want to do on disconnect*/
+        --currentUsers;
+        console.log('A user has disconnected');
+        io.emit('user count', currentUsers); 
+      });
+    })
+
+
   });
   
   console.log('Listening on port ' + PORT);
