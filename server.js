@@ -4,12 +4,12 @@ const express = require('express');
 const myDB = require('./connection');
 const fccTesting = require('./freeCodeCamp/fcctesting.js');
 const ObjectID = require('mongodb').ObjectID;
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt');
 const bodyParser = require('body-parser');
 const routes = require('./routes.js');
 const auth = require('./auth.js');
 var session = require('express-session');
-const passport = require('passport');
+// const passport = require('passport');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
@@ -58,11 +58,13 @@ myDB(async client => {
   // });
 });
 
-
+let currentUsers = 0;
 const PORT = process.env.PORT || 3000;
 http.listen(PORT, () => {
   io.on('connection', socket => {
+    ++currentUsers;
     console.log('A user has connected');
+    io.emit('user count', currentUsers);
   });
   
   console.log('Listening on port ' + PORT);
