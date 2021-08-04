@@ -10,10 +10,9 @@ const routes = require('./routes.js');
 const auth = require('./auth.js');
 var session = require('express-session');
 const passport = require('passport');
+const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
-
-const app = express();
 
 fccTesting(app); //For FCC testing purposes
 
