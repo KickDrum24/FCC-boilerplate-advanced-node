@@ -16,6 +16,10 @@ const io = require('socket.io')(http);
 const passportSocketIo = require("passport.socketio");
 // const MongoStore = require('connect-mongo');
 const cookieParser = require('cookie-parser');
+//initialize a new memory store
+const MongoStore = require('connect-mongo')(session);
+const URI = process.env.MONGO_URI;
+const store = new MongoStore({ url: URI });
 
 
 fccTesting(app); //For FCC testing purposes
@@ -63,11 +67,6 @@ myDB(async client => {
   //   })
   // });
 });
-
-//initialize a new memory store
-const MongoStore = require('connect-mongo')(session);
-const URI = process.env.MONGO_URI;
-const store = new MongoStore({ url: URI });
 
 //tell Socket.IO to use memory store
 io.use(
