@@ -8,11 +8,15 @@ const ObjectID = require('mongodb').ObjectID;
 const bodyParser = require('body-parser');
 const routes = require('./routes.js');
 const auth = require('./auth.js');
-var session = require('express-session');
+const session = require('express-session');
 const passport = require('passport');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
+const passportSocketIo = require("passport.socketio");
+const MongoStore = require('connect-mongo');
+const cookieParser = require('cookie-parser');
+
 
 fccTesting(app); //For FCC testing purposes
 
@@ -22,7 +26,9 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: true,
   saveUninitialized: true,
-  cookie: { secure: false }
+  cookie: { secure: false },
+  key: 'express.sid',
+  store: store
 }));
 
 app.use(passport.initialize());
@@ -58,12 +64,41 @@ myDB(async client => {
   // });
 });
 
+//initialize a new memory store
+const MongoStore = require('connect-mongo')(session);
+const URI = process.env.MONGO_URI;
+const store = new MongoStore({ url: URI });
+
+//tell Socket.IO to use memory store
+io.use(
+  passportSocketIo.authorize({
+    cookieParser: cookieParser,
+    key: 'express.sid',
+    secret: process.env.SESSION_SECRET,
+    store: store,
+    success: onAuthorizeSuccess,
+    fail: onAuthorizeFail
+  })
+);
+
+function onAuthorizeSuccess(data, accept) {
+  console.log('successful connection to socket.io');
+
+  accept(null, true);
+}
+
+function onAuthorizeFail(data, message, error, accept) {
+  if (error) throw new Error(message);
+  console.log('failed connection to socket.io:', message);
+  accept(null, false);
+}
+
 let currentUsers = 0;
 const PORT = process.env.PORT || 3000;
 http.listen(PORT, () => {
   io.on('connection', socket => {
     ++currentUsers;
-    console.log('A user has connected');
+    console.log('user ' + socket.request.user.name + ' connected');
     io.emit('user count', currentUsers);
 
     http.listen(PORT, () => {
