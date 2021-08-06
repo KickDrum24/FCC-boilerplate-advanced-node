@@ -103,7 +103,15 @@ http.listen(PORT, () => {
       currentUsers,
       connected: true}
       );
+      http.listen(PORT, () => {
+        socket.on('chat message', message => {
+          io.emit('chat message', {
+            name: socket.request.user.name,
+            message
+          })
 
+        })
+      })
     http.listen(PORT, () => {
       socket.on('disconnect', () => {
         /*anything you want to do on disconnect*/
