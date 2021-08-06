@@ -98,14 +98,22 @@ http.listen(PORT, () => {
   io.on('connection', socket => {
     ++currentUsers;
     console.log('user ' + socket.request.user.name + ' connected');
-    io.emit('user count', currentUsers);
+    io.emit('user', {
+      name: socket.request.user.name,
+      currentUsers,
+      connected: true}
+      );
 
     http.listen(PORT, () => {
       socket.on('disconnect', () => {
         /*anything you want to do on disconnect*/
         --currentUsers;
         console.log('A user has disconnected');
-        io.emit('user count', currentUsers); 
+        io.emit('user', {
+          name: socket.request.user.name,
+          currentUsers,
+          connected: false}
+          ); 
       });
     })
 
